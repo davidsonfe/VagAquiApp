@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "468899040803",
+    "project_id": "vagaqui-b7a6f",
+    "storage_bucket": "vagaqui-b7a6f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:468899040803:android:8f4593d1768e9001942b96",
+        "android_client_info": {
+          "package_name": "br.edu.ifpe.recife.tads.vagaqui"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "468899040803-itiho2j1k3ac7air4df3gf12ojtj7nin.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDl41270jzS8xfja3couH0UhgEh5MLErLY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "468899040803-itiho2j1k3ac7air4df3gf12ojtj7nin.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

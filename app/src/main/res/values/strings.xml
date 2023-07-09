@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">VagAqui</string>
+    <string name="edit_password1">Digite sua senha</string>
+    <string name="edit_email2">Digite seu email</string>
+    <string name="edit_emails">Digite seu email</string>
+    <string name="edit_nomes">Digite seu nome</string>
+    <string name="title_activity_maps">MapsActivity</string>
+</resources>
