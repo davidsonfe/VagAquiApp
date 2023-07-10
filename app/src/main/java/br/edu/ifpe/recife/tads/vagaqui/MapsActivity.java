@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 
@@ -13,10 +14,10 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -42,15 +43,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
+
     @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -73,15 +66,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         // Adicionar um marcador na localização atual
                         LatLng currentLocation = new LatLng(latitude, longitude);
                         mMap.addMarker(new MarkerOptions().position(currentLocation).title("Minha Localização"));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 12f));
+
+                        // Desenhar um círculo com raio de 500 metros em torno da localização atual
+                        CircleOptions circleOptions = new CircleOptions()
+                                .center(currentLocation)
+                                .radius(500) // raio em metros
+                                .strokeColor(Color.BLUE)
+                                .fillColor(Color.parseColor("#500000FF")); // cor com transparência
+                        mMap.addCircle(circleOptions);
                     }
                 }
             });
+
+            // Habilitar controles de zoom
+            mMap.getUiSettings().setZoomControlsEnabled(true);
+
         } else {
             // Caso as permissões de localização não tenham sido concedidas, solicitar permissões
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
         }
     }
+
 
     @Override
     public void onBackPressed() {
