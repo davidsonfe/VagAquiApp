@@ -36,8 +36,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -180,17 +178,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Referenciar os elementos do layout do modal
         EditText editTextString = dialogView.findViewById(R.id.editTextString);
+        EditText editNome = dialogView.findViewById(R.id.editTextUserName);
         Button buttonSalvar = dialogView.findViewById(R.id.buttonSalvar);
 
         // Configurar o evento de clique no botão "Salvar"
         buttonSalvar.setOnClickListener(v -> {
             String texto = editTextString.getText().toString();
+            String nome = editNome.getText().toString();
 
-            if (texto.isEmpty()) {
-                Toast.makeText(getApplicationContext(), "Digite uma Vaga antes de salvar.", Toast.LENGTH_SHORT).show();
+            if (texto.isEmpty() || nome.isEmpty()) {
+                String message = nome.isEmpty() ? "Digite o nome do usuário" : "Digite a vaga";
+                message += " antes de salvar.";
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
             } else {
                 // Faça o que for necessário com a string cadastrada e a posição do marcador
-                salvarString(texto, selectedMarkerPosition.latitude, selectedMarkerPosition.longitude);
+                salvarString(texto, nome, selectedMarkerPosition.latitude, selectedMarkerPosition.longitude);
                 dialog.dismiss(); // Fechar o modal após salvar
                 // Exibir mensagem de sucesso
                 Toast.makeText(getApplicationContext(), "Salvando a Vaga...", Toast.LENGTH_SHORT).show();
@@ -201,11 +203,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         dialog.show();
     }
 
-    private void salvarString(String texto, double latitude, double longitude) {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        if (currentUser != null) {
-            String userName = currentUser.getDisplayName(); // Get the user's display name
+    private void salvarString(String texto, String nome, double latitude, double longitude) {
 
             DatabaseReference database = FirebaseDatabase.getInstance().getReference();
             DatabaseReference stringsRef = database.child("strings");
@@ -218,7 +216,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             parkingData.put("texto", texto);
             parkingData.put("latitude", latitude);
             parkingData.put("longitude", longitude);
-            parkingData.put("userName", userName);
+            parkingData.put("nome", nome);
 
             // Save the data to the database using the unique key
             stringsRef.child(key).setValue(parkingData)
@@ -234,10 +232,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             Toast.makeText(getApplicationContext(), "Erro ao adicionar o local do estacionamento.", Toast.LENGTH_SHORT).show();
                         }
                     });
-        } else {
-            // Handle the case when no user is logged in
-            Toast.makeText(getApplicationContext(), "Nenhum usuário está logado. Faça o login para adicionar um local de estacionamento.", Toast.LENGTH_SHORT).show();
-        }
+
     }
 
 
@@ -251,11 +246,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     String texto = snapshot.child("texto").getValue(String.class);
+                    String nome = snapshot.child("nome").getValue(String.class);
                     double latitude = snapshot.child("latitude").getValue(Double.class);
                     double longitude = snapshot.child("longitude").getValue(Double.class);
 
                     // Create a notification for each data entry
-                    showNotification(texto, latitude, longitude);
+                    showNotification(texto, nome, latitude, longitude);
                 }
             }
 
@@ -267,7 +263,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @SuppressLint("MissingPermission")
-    private void showNotification(String texto, double latitude, double longitude) {
+    private void showNotification(String texto, String nome, double latitude, double longitude) {
         // Create an Intent to open the MapsActivity when the notification is clicked
         Intent intent = new Intent(this, MapsActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -275,7 +271,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "CHANNEL_ID")
                 .setContentTitle("VagAqui -> ")
-                .setContentText("Texto: " + texto + ", Latitude: " + latitude + ", Longitude: " + longitude)
+                .setContentText("Texto: " + texto + ", Nome: " + nome + ", Latitude: " + latitude + ", Longitude: " + longitude)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
