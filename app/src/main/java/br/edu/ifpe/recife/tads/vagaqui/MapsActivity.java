@@ -125,6 +125,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 if (marker.getTitle().equals("Minha Localização") || marker.getTitle().equals("Novo Marcador")) {
                                     // Exibir o modal de cadastro
                                     exibirModalCadastro();
+                                }else {
+                                    // Show custom dialog or bottom sheet to update the marker's information
+                                    showUpdateDialog(marker);
                                 }
                                 return false;
                             }
@@ -245,9 +248,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         stringsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                 // Limpar todos os marcadores existentes no mapa antes de adicionar os novos
+                // Limpar todos os marcadores existentes no mapa antes de adicionar os novos
+                mMap.clear();
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String key = snapshot.getKey(); // Get the unique key of the marker from Firebase
                     String texto = snapshot.child("texto").getValue(String.class);
                     String nome = snapshot.child("nome").getValue(String.class);
                     Double latitude = snapshot.child("latitude").getValue(Double.class);
@@ -261,8 +266,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 .title("Nome: " + nome)
                                 .snippet("Texto: " + texto);
 
-                        mMap.addMarker(markerOptions);
-                        // Show notification for each marker
+                        Marker marker = mMap.addMarker(markerOptions);
+                        marker.setTag(key); // Store the unique key as a tag to the marker
                         showNotification(texto, nome, latitude, longitude);
                     } else {
                         // Tratamento de erro caso algum dado esteja faltando no Firebase
@@ -278,6 +283,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
     }
+
 
 
 
@@ -312,6 +318,70 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    private void showUpdateDialog(Marker marker) {
+        // Inflar o layout do modal
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_update, null);
+
+        // Criar o AlertDialog
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setView(dialogView);
+        AlertDialog dialog = dialogBuilder.create();
+
+        // Referenciar os elementos do layout do modal
+        EditText editTextString = dialogView.findViewById(R.id.editTextString);
+        EditText editNome = dialogView.findViewById(R.id.editTextUserName);
+        Button buttonSalvar = dialogView.findViewById(R.id.buttonSalvar);
+
+        // Get the stored tag (unique key) from the marker
+        String key = (String) marker.getTag();
+
+        // Set the current values of the marker to the dialog fields
+        editTextString.setText(marker.getSnippet().replace("Texto: ", ""));
+        editNome.setText(marker.getTitle().replace("Nome: ", ""));
+
+        // Configurar o evento de clique no botão "Salvar"
+        buttonSalvar.setOnClickListener(v -> {
+            String texto = editTextString.getText().toString();
+            String nome = editNome.getText().toString();
+
+            if (texto.isEmpty() || nome.isEmpty()) {
+                String message = nome.isEmpty() ? "Digite o nome do usuário" : "Digite a vaga";
+                message += " antes de salvar.";
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+            } else {
+                // Update the marker's information in Firebase
+                DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+                DatabaseReference stringsRef = database.child("strings").child(key);
+
+                Map<String, Object> updateData = new HashMap<>();
+                updateData.put("texto", texto);
+                updateData.put("nome", nome);
+
+                stringsRef.updateChildren(updateData)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                // Update the marker's data locally
+                                marker.setSnippet("Texto: " + texto);
+                                marker.setTitle("Nome: " + nome);
+                                marker.showInfoWindow(); // Show the updated info window
+                                Toast.makeText(getApplicationContext(), "Informações atualizadas com sucesso!", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getApplicationContext(), "Erro ao atualizar informações.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                dialog.dismiss(); // Fechar o modal após salvar
+            }
+        });
+
+        // Exibir o modal
+        dialog.show();
+    }
 
 
     @Override
