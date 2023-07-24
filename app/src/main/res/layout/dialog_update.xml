@@ -23,4 +23,10 @@
         android:layout_height="wrap_content"
         android:text="Atualizar" />
 
+    <Button
+        android:id="@+id/buttonExcluir"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Excluir" />
+
 </LinearLayout>

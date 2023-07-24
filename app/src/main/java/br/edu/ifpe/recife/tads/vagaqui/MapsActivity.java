@@ -331,6 +331,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         EditText editTextString = dialogView.findViewById(R.id.editTextString);
         EditText editNome = dialogView.findViewById(R.id.editTextUserName);
         Button buttonSalvar = dialogView.findViewById(R.id.buttonSalvar);
+        @SuppressLint({"MissingInflatedId", "LocalSuppress"}) Button buttonExcluir = dialogView.findViewById(R.id.buttonExcluir); // New delete button
 
         // Get the stored tag (unique key) from the marker
         String key = (String) marker.getTag();
@@ -379,9 +380,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        // Configurar o evento de clique no botão "Excluir"
+        buttonExcluir.setOnClickListener(v -> {
+            // Delete the marker from Firebase
+            DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+            DatabaseReference stringsRef = database.child("strings").child(key);
+
+            stringsRef.removeValue()
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            // Remove the marker from the map
+                            marker.remove();
+                            dialog.dismiss(); // Close the dialog after deletion
+                            Toast.makeText(getApplicationContext(), "Marcador excluído com sucesso!", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getApplicationContext(), "Erro ao excluir o marcador.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        });
+
         // Exibir o modal
         dialog.show();
     }
+
 
 
     @Override
