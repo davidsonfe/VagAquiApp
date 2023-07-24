@@ -262,6 +262,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 .snippet("Texto: " + texto);
 
                         mMap.addMarker(markerOptions);
+                        // Show notification for each marker
+                        showNotification(texto, nome, latitude, longitude);
                     } else {
                         // Tratamento de erro caso algum dado esteja faltando no Firebase
                         Log.e("getDataFromFirebase", "Erro ao recuperar dados do Firebase. Alguns dados estão faltando.");
