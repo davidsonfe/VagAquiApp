@@ -5,26 +5,37 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".SignUpActivity">
+    tools:context=".SignUpActivity"
+    android:background="@drawable/iimg1">
 
 
     <EditText
         android:id="@+id/edit_email"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
+        android:layout_marginTop="255dp"
+        android:backgroundTint="#000000"
+        android:drawableTint="#000000"
         android:ems="10"
-        android:inputType="textPersonName"
         android:hint="@string/edit_email2"
+        android:inputType="textPersonName"
+        android:textColor="#000000"
+        android:textColorHint="@color/black"
+        android:textStyle="bold"
         tools:layout_editor_absoluteX="100dp"
         tools:layout_editor_absoluteY="332dp" />
 
     <EditText
         android:id="@+id/edit_password"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
+        android:backgroundTint="#000000"
         android:ems="10"
         android:hint="@string/edit_password1"
         android:inputType="textPassword"
+        android:textColor="#000000"
+        android:textColorHint="@color/black"
+        android:textStyle="bold"
         tools:layout_editor_absoluteX="101dp"
         tools:layout_editor_absoluteY="449dp" />
 
@@ -45,6 +56,6 @@
         android:onClick="buttonSignUpClick"
         android:text="Cadastrar"
         tools:layout_editor_absoluteX="154dp"
-        tools:layout_editor_absoluteY="570dp" />
+        tools:layout_editor_absoluteY="920dp" />
 
 </LinearLayout>
