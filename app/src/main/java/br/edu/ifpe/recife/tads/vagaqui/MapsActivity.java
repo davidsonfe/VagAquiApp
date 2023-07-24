@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -132,7 +133,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         // Desenhar um círculo com raio de 200 metros em torno da localização atual
                         CircleOptions circleOptions = new CircleOptions()
                                 .center(currentLocation)
-                                .radius(200) // raio em metros
+                                .radius(100) // raio em metros
                                 .strokeColor(Color.BLUE)
                                 .fillColor(Color.parseColor("#500000FF")); // cor com transparência
                         mMap.addCircle(circleOptions);
@@ -244,23 +245,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         stringsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                 // Limpar todos os marcadores existentes no mapa antes de adicionar os novos
+
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     String texto = snapshot.child("texto").getValue(String.class);
                     String nome = snapshot.child("nome").getValue(String.class);
-                    double latitude = snapshot.child("latitude").getValue(Double.class);
-                    double longitude = snapshot.child("longitude").getValue(Double.class);
+                    Double latitude = snapshot.child("latitude").getValue(Double.class);
+                    Double longitude = snapshot.child("longitude").getValue(Double.class);
 
-                    // Create a notification for each data entry
-                    showNotification(texto, nome, latitude, longitude);
+                    if (texto != null && nome != null && latitude != null && longitude != null) {
+                        // Criar um novo marcador no mapa com as informações recuperadas do Firebase
+                        LatLng markerPosition = new LatLng(latitude, longitude);
+                        MarkerOptions markerOptions = new MarkerOptions()
+                                .position(markerPosition)
+                                .title("Nome: " + nome)
+                                .snippet("Texto: " + texto);
+
+                        mMap.addMarker(markerOptions);
+                    } else {
+                        // Tratamento de erro caso algum dado esteja faltando no Firebase
+                        Log.e("getDataFromFirebase", "Erro ao recuperar dados do Firebase. Alguns dados estão faltando.");
+                    }
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle any errors here
+                // Tratamento de erro caso ocorra uma falha na leitura do Firebase
+                Log.e("getDataFromFirebase", "Erro ao ler dados do Firebase: " + databaseError.getMessage());
             }
         });
     }
+
+
 
     @SuppressLint("MissingPermission")
     private void showNotification(String texto, String nome, double latitude, double longitude) {
